@@ -9,6 +9,7 @@ import com.senla.model.Order;
 import com.senla.model.Room;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,10 @@ public class RoomService implements IRoomService {
         OrderFilter orderFilter = new OrderFilter();
         orderFilter.setTargetDate(LocalDate.now());
         List<Order> currentOrders = orderDao.getAll(orderFilter);
-        List<Room> notFreeRooms = currentOrders.stream().map(Order::getRoom).collect(Collectors.toList());
+        List<Room> notFreeRooms = new ArrayList<>();
+        for (Order order : currentOrders) {
+            notFreeRooms.add(order.getRoom());
+        }
         RoomFilter roomFilter = new RoomFilter();
         roomFilter.setExcludedRooms(notFreeRooms);
         return roomDao.getAll(roomFilter, "number");
@@ -53,7 +57,10 @@ public class RoomService implements IRoomService {
         OrderFilter orderFilter = new OrderFilter();
         orderFilter.setTargetDate(LocalDate.now());
         List<Order> currentOrders = orderDao.getAll(orderFilter);
-        List<Room> notFreeRooms = currentOrders.stream().map(Order::getRoom).collect(Collectors.toList());
+        List<Room> notFreeRooms = new ArrayList<>();
+        for (Order order : currentOrders) {
+            notFreeRooms.add(order.getRoom());
+        }
         RoomFilter roomFilter = new RoomFilter();
         roomFilter.setExcludedRooms(notFreeRooms);
         return roomDao.getAll(roomFilter, "capacity");

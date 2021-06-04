@@ -23,7 +23,12 @@ public abstract class AbstractDao<T extends AEntity, F> implements IGenericDao<T
 
     @Override
     public T get(Long id) {
-        return repository.stream().filter(entity -> entity.getId().equals(id)).findFirst().orElse(null);
+        for (T entity : repository) {
+            if (entity.getId().equals(id)) {
+                return entity;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -43,16 +48,23 @@ public abstract class AbstractDao<T extends AEntity, F> implements IGenericDao<T
 
     @Override
     public List<T> getAll(F filter, String sortName) {
-        Stream<T> stream = repository.stream();
+        List<T> results = new ArrayList<>();
+
         Predicate<T> filterPredicate = getPredicateByFilter(filter);
         if (filterPredicate != null) {
-            stream = stream.filter(filterPredicate);
+            for (T entity : repository) {
+                if (filterPredicate.test(entity)) {//проверяем с помощью метода тест подходит ли нам этот элемент
+                    results.add(entity); //если подошёл - то добавляем в результирующий лист
+                }
+            }
+        } else {
+            results.addAll(repository);//если нет фильтра, то просто добавляем все элементы в другой список
         }
         Comparator<T> comparator = getComparatorBySortName(sortName);
         if (comparator != null) {
-            stream = stream.sorted(comparator);
+            results.sort(comparator);//если есть компаратор, то применяем его на результирующем списке
         }
-        return stream.collect(Collectors.toList());
+        return results;
     }
 
     protected abstract Comparator<T> getComparatorBySortName(String sortName);
