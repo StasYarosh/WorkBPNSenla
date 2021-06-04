@@ -2,6 +2,8 @@ package com.senla.dao;
 
 import com.senla.api.dao.IOrderDao;
 import com.senla.api.filter.OrderFilter;
+import com.senla.comparator.order.OrderStartDateComparator;
+import com.senla.filter.predicate.order.OrderFilterPredicate;
 import com.senla.model.Order;
 
 import java.util.Comparator;
@@ -11,24 +13,13 @@ public class OrderDao extends AbstractDao<Order, OrderFilter> implements IOrderD
     @Override
     protected Comparator<Order> getComparatorBySortName(String sortName) {
         if ("startDate".equals(sortName)) {
-            return Comparator.comparing(Order::getStartDate);
+            return new OrderStartDateComparator();
         }
         return null;
     }
 
     @Override
     protected Predicate<Order> getPredicateByFilter(OrderFilter filter) {
-        if (filter == null) {
-            return null;
-        }
-        return (order) -> {
-            if (filter.getTargetDate() != null) {
-                if (filter.getTargetDate().compareTo(order.getStartDate()) < 0 ||
-                        filter.getTargetDate().compareTo(order.getEndDate()) > 0) {
-                    return false;
-                }
-            }
-            return true;
-        };
+        return new OrderFilterPredicate(filter);
     }
 }
